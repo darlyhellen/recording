@@ -18,7 +18,7 @@ import com.xiangxun.video.camera.util.Log;
  * Copyright by [Zhangyuhui/Darly]
  * ©2017 XunXiang.Company. All rights reserved.
  *
- * @TODO:
+ * @TODO:新增一个自定义功能控件，仿照微信录制视频时的点击按钮，一个圆形外环，跟随时间进行加载。
  */
 public class ProgressImage extends View {
 
@@ -109,6 +109,16 @@ public class ProgressImage extends View {
         super.onDraw(canvas);
 
         /**
+         * 画最外层的大圆环,实心底色，不画的话背景透明
+         */
+        int centre = getWidth() / 2; //获取圆心的x坐标
+        int bigradius = centre - 2; //圆环的半径
+        paint.setColor(roundColor); //设置大圆环的颜色
+        paint.setStyle(Paint.Style.FILL); //设置空心
+        paint.setStrokeWidth(roundWidth); //设置圆环的宽度
+        paint.setAntiAlias(true);  //消除锯齿
+        canvas.drawCircle(centre, centre, bigradius, paint); //画出圆环
+        /**
          * 画圆弧 ，画圆环的进度
          */
         long time = System.currentTimeMillis();
@@ -117,9 +127,8 @@ public class ProgressImage extends View {
             /**
              * 画最外层的大圆环
              */
-            int centre = getWidth() / 2; //获取圆心的x坐标
             int radius = (int) (centre - roundWidth / 2); //圆环的半径
-            paint.setColor(roundColor); //设置圆环的颜色
+            paint.setColor(roundColor); //设置大圆环的颜色
             paint.setStyle(Paint.Style.STROKE); //设置空心
             paint.setStrokeWidth(roundWidth); //设置圆环的宽度
             paint.setAntiAlias(true);  //消除锯齿
@@ -128,13 +137,12 @@ public class ProgressImage extends View {
             /**
              * 画小圆
              */
-            int centres = getWidth() / 2; //获取圆心的x坐标
-            int radiuss = (int) (centre - roundWidth / 2); //圆环的半径
-            paint.setColor(Color.GREEN); //设置圆环的颜色
+            int radiuss = (int) (centre - 4 * roundWidth / 2); //圆环的半径
+            paint.setColor(Color.WHITE); //设置小圆的颜色
             paint.setStyle(Paint.Style.FILL); //设置空心
             paint.setStrokeWidth(roundWidth); //设置圆环的宽度
             paint.setAntiAlias(true);  //消除锯齿
-            canvas.drawCircle(centres, centres, radiuss, paint); //画出圆环
+            canvas.drawCircle(centre, centre, radiuss, paint); //画出圆环
 
             int measuredWidth = getMeasuredWidth();
             float top = measuredWidth / 2.0f / max;
@@ -147,13 +155,13 @@ public class ProgressImage extends View {
             switch (style) {
                 case STROKE: {
                     paint.setStyle(Paint.Style.STROKE);
-                    canvas.drawArc(oval, 0, 360 * tmp / max, false, paint);  //根据进度画圆弧
+                    canvas.drawArc(oval, 270, 360 * tmp / max, false, paint);  //根据进度画圆弧
                     break;
                 }
                 case FILL: {
                     paint.setStyle(Paint.Style.FILL_AND_STROKE);
                     if (progress != 0)
-                        canvas.drawArc(oval, 0, 360 * tmp / max, true, paint);  //根据进度画圆弧
+                        canvas.drawArc(oval, 270, 360 * tmp / max, true, paint);  //根据进度画圆弧
                     break;
                 }
             }
@@ -164,11 +172,10 @@ public class ProgressImage extends View {
                 //listener.progressDown();
                 return;
             }
-        }else {
+        } else {
             /**
              * 画最外层的大圆环
              */
-            int centre = getWidth() / 2; //获取圆心的x坐标
             int radius = (int) (centre - roundWidth / 2); //圆环的半径
             paint.setColor(roundColor); //设置圆环的颜色
             paint.setStyle(Paint.Style.STROKE); //设置空心
@@ -179,13 +186,12 @@ public class ProgressImage extends View {
             /**
              * 画小圆
              */
-            int centres = getWidth() / 2; //获取圆心的x坐标
             int radiuss = (int) (centre - roundWidth / 2); //圆环的半径
-            paint.setColor(Color.GREEN); //设置圆环的颜色
+            paint.setColor(Color.WHITE); //设置圆环的颜色
             paint.setStyle(Paint.Style.FILL); //设置空心
             paint.setStrokeWidth(roundWidth); //设置圆环的宽度
             paint.setAntiAlias(true);  //消除锯齿
-            canvas.drawCircle(centres, centres, radiuss, paint); //画出圆环
+            canvas.drawCircle(centre, centre, radiuss, paint); //画出圆环
         }
 
 

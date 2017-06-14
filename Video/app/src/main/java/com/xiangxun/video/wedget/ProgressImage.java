@@ -22,6 +22,13 @@ import com.xiangxun.video.camera.util.Log;
  */
 public class ProgressImage extends View {
 
+
+    public interface OnFinishListener {
+        void progressDown();
+    }
+
+    private OnFinishListener listener;
+
     /**
      * 画笔对象的引用
      */
@@ -169,7 +176,7 @@ public class ProgressImage extends View {
                 invalidate();
             }
             if (tmp >= max) {
-                //listener.progressDown();
+                listener.progressDown();
                 return;
             }
         } else {
@@ -299,6 +306,9 @@ public class ProgressImage extends View {
         this.style = style;
     }
 
+    public void setOnFinishListener(OnFinishListener listener) {
+        this.listener = listener;
+    }
 
     enum State {
         START(1, "开始"),

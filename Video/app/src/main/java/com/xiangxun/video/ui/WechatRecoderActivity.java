@@ -21,6 +21,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +49,7 @@ import java.util.ArrayList;
  * <p/>
  * Created by maimingliang on 2016/9/25.
  */
-public class WechatRecoderActivity extends BaseActivity implements MediaRecorderBase.OnErrorListener, MediaRecorderBase.OnEncodeListener {
+public class WechatRecoderActivity extends BaseActivity implements MediaRecorderBase.OnErrorListener, MediaRecorderBase.OnEncodeListener, ProgressImage.OnFinishListener {
 
 
     /**
@@ -64,7 +65,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
     /**
      * 录制最小时间
      */
-    public static int RECORD_TIME_MIN = 3 * 1000;
+    public static int RECORD_TIME_MIN = 2 * 1000;
 
     /**
      * 按住拍偏移距离
@@ -122,8 +123,8 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
     private boolean mCreated;
 
 
-    private boolean isCancelRecoder;
-    private boolean isRecoder;
+//    private boolean isCancelRecoder;
+//    private boolean isRecoder;
 
     private Handler mHandler = new Handler();
 
@@ -136,8 +137,14 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
     SurfaceView mSurfaceView;
     ImageView mImgRecordFocusing;
     RelativeLayout mRlRecoderSurfaceview;
-    ProgressImage mBtnPress;
     LinearLayout mRlRecorderBottom;
+    //视频录制按钮
+    ProgressImage mBtnPress;
+    //录制完成后展示的按钮
+    TableRow select;
+    ImageView id_recorder_de;
+    ImageView id_recorder_ch;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,9 +173,61 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
         mBtnPress.setMax(RECORD_TIME_MAX);
         mBtnPress.setCricleProgressColor(R.color.blue);
         mBtnPress.setRoundWidth(20);
-
+        mBtnPress.setVisibility(View.VISIBLE);
+        select = (TableRow) findViewById(R.id.id_recorder_select);
+        id_recorder_de = (ImageView) findViewById(R.id.id_recorder_de);
+        id_recorder_ch = (ImageView) findViewById(R.id.id_recorder_ch);
+        select.setVisibility(View.GONE);
     }
 
+
+    private void initData() {
+        mWindowWidth = DeviceUtils.getScreenWidth(this);
+
+        mFocusWidth = ConvertToUtils.dipToPX(this, 64);
+        try {
+            mImgRecordFocusing.setImageResource(R.drawable.ms_video_focus_icon);
+        } catch (OutOfMemoryError e) {
+            Log.e("maiml", e.getMessage());
+        }
+
+        mTvRecorderCancel.setTextColor(TITEL_BAR_CANCEL_TEXT_COLOR);
+
+        setListener();
+    }
+
+    private void setListener() {
+        if (DeviceUtils.hasICS()) {
+            mSurfaceView.setOnTouchListener(onSurfaveViewTouchListener);
+        }
+        mBtnPress.setOnFinishListener(this);
+        mBtnPress.setOnTouchListener(onVideoRecoderTouchListener);
+
+        mTvRecorderCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+        id_recorder_ch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //选中视频，进行播放或者传递。
+                String outputVideoPath = mMediaObject.getOutputVideoPath();
+                //编码完成后，直接调用播放器，不用跳转回原始页面。
+                Intent data = new Intent(WechatRecoderActivity.this, PlayActivity.class);
+                data.putExtra("path", outputVideoPath);
+                startActivity(data);
+            }
+        });
+        id_recorder_de.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                select.setVisibility(View.GONE);
+                mBtnPress.setVisibility(View.VISIBLE);
+            }
+        });
+    }
 
     @Override
     protected void onResume() {
@@ -211,6 +270,225 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
         mMediaRecorder.setSurfaceHolder(mSurfaceView.getHolder());
         mMediaRecorder.prepare();
     }
+
+    private void initCustomerAttrs() {
+
+
+        int maxTime = getIntent().getIntExtra(CommonCons.RECORD_TIME_MAX, 0);
+
+        if (maxTime != 0) {
+            RECORD_TIME_MAX = maxTime;
+        }
+
+        int minTime = getIntent().getIntExtra(CommonCons.RECORD_TIME_MIN, 0);
+
+        if (minTime != 0) {
+            RECORD_TIME_MIN = minTime;
+        }
+
+        int offset = getIntent().getIntExtra(CommonCons.OFFSET_DRUTION, 0);
+
+        if (offset != 0) {
+            OFFSET_DRUTION = offset;
+        }
+
+        int cancelColor = getIntent().getIntExtra(CommonCons.TITEL_BAR_CANCEL_TEXT_COLOR, 0);
+
+        if (cancelColor != 0) {
+            TITEL_BAR_CANCEL_TEXT_COLOR = cancelColor;
+        }
+
+        int btnColor = getIntent().getIntExtra(CommonCons.PRESS_BTN_COLOR, 0);
+
+        if (btnColor != 0) {
+            PRESS_BTN_COLOR = btnColor;
+        }
+
+        int minTimeProgressColor = getIntent().getIntExtra(CommonCons.LOW_MIN_TIME_PROGRESS_COLOR, 0);
+
+        if (minTimeProgressColor != 0) {
+            LOW_MIN_TIME_PROGRESS_COLOR = minTimeProgressColor;
+        }
+        int color = getIntent().getIntExtra(CommonCons.PROGRESS_COLOR, 0);
+
+
+        if (color != 0) {
+            PROGRESS_COLOR = color;
+        }
+
+        int pressbg = getIntent().getIntExtra(CommonCons.PRESS_BTN_BG, 0);
+
+        if (pressbg != 0) {
+            PRESS_BTN_BG = pressbg;
+        }
+
+    }
+
+
+    private void startRecoder() {
+        if (!APP.isAvailableSpace()) {
+            return;
+        }
+        select.setVisibility(View.GONE);
+        mBtnPress.setVisibility(View.VISIBLE);
+        //isCancelRecoder = false;
+        if (mMediaRecorder == null) {
+            return;
+        }
+        MediaObject.MediaPart part = mMediaRecorder.startRecord();
+        if (part == null) {
+            return;
+        }
+        // isRecoder = true;
+
+    }
+
+
+    private void startEncoding() {
+        mMediaRecorder.startEncoding();
+    }
+
+
+    private void stopAll() {
+        stopRecord();
+        //  isRecoder = false;
+
+
+    }
+
+//    private void releaseCancelRecoder() {
+//        isCancelRecoder = true;
+//    }
+//
+//    private void slideCancelRecoder() {
+//        isCancelRecoder = false;
+//    }
+
+    private void recoderShortTime() {
+        removeRecoderPart();
+        mHandler.postDelayed(mRunable, 1000l);
+    }
+
+    private void hideRecoderTxt() {
+        select.setVisibility(View.VISIBLE);
+        mBtnPress.setVisibility(View.GONE);
+    }
+
+    private void removeRecoderPart() {
+        // 回删
+        if (mMediaObject != null) {
+            mMediaObject.removeAllPart();
+
+        }
+    }
+
+
+    /**
+     * 停止录制
+     */
+    private void stopRecord() {
+        if (mMediaRecorder != null) {
+            mMediaRecorder.stopRecord();
+        }
+    }
+
+    private Runnable mRunable = new Runnable() {
+        @Override
+        public void run() {
+            hideRecoderTxt();
+        }
+    };
+
+
+    /**
+     * 点击屏幕录制
+     */
+    private View.OnTouchListener onVideoRecoderTouchListener = new View.OnTouchListener() {
+        private float startY;
+        private float moveY;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (mMediaRecorder == null) {
+                return false;
+            }
+
+            switch (event.getAction()) {
+                default:
+                    return true;
+                case MotionEvent.ACTION_DOWN:
+                    startY = event.getY();
+                    mBtnPress.start();
+                    startRecoder();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    //滑动取消视频录制。
+//                    int durationMove = mMediaObject.getDuration();
+//                    if (durationMove >= RECORD_TIME_MAX) {
+//                        stopAll();
+//                        mBtnPress.stop();
+//                        return true;
+//                    }
+//                    moveY = event.getY();
+//                    float drution = moveY - startY;
+//
+//                    if ((drution > 0.0f) && Math.abs(drution) > OFFSET_DRUTION) {
+//                        slideCancelRecoder();
+//
+//                    }
+//                    if ((drution < 0.0f) && (Math.abs(drution) > OFFSET_DRUTION)) {
+//                        releaseCancelRecoder();
+//                    }
+                    //後續功能，滑動修改攝像頭焦距。
+                    break;
+                case MotionEvent.ACTION_UP:
+                    stopAll();
+                    mBtnPress.stop();
+                    int duration = mMediaObject.getDuration();
+                    if (duration < RECORD_TIME_MIN) {
+                        recoderShortTime();
+                        return true;
+                    }
+                    //if (isCancelRecoder) {
+                    hideRecoderTxt();
+                    //removeRecoderPart();
+                    // }
+                    startEncoding();
+                    break;
+
+            }
+
+            return true;
+
+
+        }
+
+    };
+
+
+    /**
+     * 点击屏幕对焦
+     */
+    private View.OnTouchListener onSurfaveViewTouchListener = new View.OnTouchListener() {
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (mMediaRecorder == null || !mCreated) {
+                return false;
+            }
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    // 检测是否手动对焦
+                    if (checkCameraFocus(event))
+                        return true;
+                    break;
+            }
+            return true;
+        }
+
+    };
+
 
     /**
      * 手动对焦
@@ -293,257 +571,14 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
     }
 
 
-    private void initCustomerAttrs() {
-
-
-        int maxTime = getIntent().getIntExtra(CommonCons.RECORD_TIME_MAX, 0);
-
-        if (maxTime != 0) {
-            RECORD_TIME_MAX = maxTime;
-        }
-
-        int minTime = getIntent().getIntExtra(CommonCons.RECORD_TIME_MIN, 0);
-
-        if (minTime != 0) {
-            RECORD_TIME_MIN = minTime;
-        }
-
-        int offset = getIntent().getIntExtra(CommonCons.OFFSET_DRUTION, 0);
-
-        if (offset != 0) {
-            OFFSET_DRUTION = offset;
-        }
-
-        int cancelColor = getIntent().getIntExtra(CommonCons.TITEL_BAR_CANCEL_TEXT_COLOR, 0);
-
-        if (cancelColor != 0) {
-            TITEL_BAR_CANCEL_TEXT_COLOR = cancelColor;
-        }
-
-        int btnColor = getIntent().getIntExtra(CommonCons.PRESS_BTN_COLOR, 0);
-
-        if (btnColor != 0) {
-            PRESS_BTN_COLOR = btnColor;
-        }
-
-        int minTimeProgressColor = getIntent().getIntExtra(CommonCons.LOW_MIN_TIME_PROGRESS_COLOR, 0);
-
-        if (minTimeProgressColor != 0) {
-            LOW_MIN_TIME_PROGRESS_COLOR = minTimeProgressColor;
-        }
-        int color = getIntent().getIntExtra(CommonCons.PROGRESS_COLOR, 0);
-
-
-        if (color != 0) {
-            PROGRESS_COLOR = color;
-        }
-
-        int pressbg = getIntent().getIntExtra(CommonCons.PRESS_BTN_BG, 0);
-
-        if (pressbg != 0) {
-            PRESS_BTN_BG = pressbg;
-        }
-
+    @Override
+    public void progressDown() {
+        stopAll();
+        mBtnPress.stop();
+        hideRecoderTxt();
+        //removeRecoderPart();
+        startEncoding();
     }
-
-
-    private void initData() {
-        mWindowWidth = DeviceUtils.getScreenWidth(this);
-
-        mFocusWidth = ConvertToUtils.dipToPX(this, 64);
-        try {
-            mImgRecordFocusing.setImageResource(R.drawable.ms_video_focus_icon);
-        } catch (OutOfMemoryError e) {
-            Log.e("maiml", e.getMessage());
-        }
-
-        mTvRecorderCancel.setTextColor(TITEL_BAR_CANCEL_TEXT_COLOR);
-
-        setListener();
-    }
-
-
-    private void startRecoder() {
-        if (!APP.isAvailableSpace()) {
-            return;
-        }
-        isCancelRecoder = false;
-        if (mMediaRecorder == null) {
-            return;
-        }
-        MediaObject.MediaPart part = mMediaRecorder.startRecord();
-        if (part == null) {
-            return;
-        }
-        isRecoder = true;
-
-    }
-
-
-    private void startEncoding() {
-        mMediaRecorder.startEncoding();
-    }
-
-
-    private void stopAll() {
-        stopRecord();
-        isRecoder = false;
-
-
-    }
-
-    private void releaseCancelRecoder() {
-        isCancelRecoder = true;
-    }
-
-    private void slideCancelRecoder() {
-        isCancelRecoder = false;
-    }
-
-    private void recoderShortTime() {
-        removeRecoderPart();
-        mHandler.postDelayed(mRunable, 1000l);
-    }
-
-    private void hideRecoderTxt() {
-    }
-
-    private void removeRecoderPart() {
-        // 回删
-        if (mMediaObject != null) {
-            mMediaObject.removeAllPart();
-
-        }
-    }
-
-
-    /**
-     * 停止录制
-     */
-    private void stopRecord() {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.stopRecord();
-        }
-    }
-
-    private Runnable mRunable = new Runnable() {
-        @Override
-        public void run() {
-            hideRecoderTxt();
-        }
-    };
-
-
-    private void setListener() {
-        if (DeviceUtils.hasICS()) {
-            mSurfaceView.setOnTouchListener(onSurfaveViewTouchListener);
-        }
-
-        mBtnPress.setOnTouchListener(onVideoRecoderTouchListener);
-
-        mTvRecorderCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
-    }
-
-
-    /**
-     * 点击屏幕录制
-     */
-    private View.OnTouchListener onVideoRecoderTouchListener = new View.OnTouchListener() {
-        private float startY;
-        private float moveY;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (mMediaRecorder == null) {
-                return false;
-            }
-
-            switch (event.getAction()) {
-
-                default:
-                    return true;
-                case MotionEvent.ACTION_DOWN:
-
-                    startY = event.getY();
-                    //startRecoderAnim(mBtnPress);
-                    mBtnPress.start();
-                    startRecoder();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    int durationMove = mMediaObject.getDuration();
-                    if (durationMove >= RECORD_TIME_MAX) {
-                        stopAll();
-                        // stopRecoderAnim(mBtnPress);
-                        mBtnPress.stop();
-                        return true;
-                    }
-                    moveY = event.getY();
-                    float drution = moveY - startY;
-
-                    if ((drution > 0.0f) && Math.abs(drution) > OFFSET_DRUTION) {
-                        slideCancelRecoder();
-
-                    }
-                    if ((drution < 0.0f) && (Math.abs(drution) > OFFSET_DRUTION)) {
-                        releaseCancelRecoder();
-                    }
-                    break;
-                case MotionEvent.ACTION_UP:
-                    stopAll();
-                    //stopRecoderAnim(mBtnPress);
-                    mBtnPress.stop();
-                    if (isCancelRecoder) {
-                        hideRecoderTxt();
-                        removeRecoderPart();
-                        return true;
-                    }
-                    int duration = mMediaObject.getDuration();
-                    if (duration < RECORD_TIME_MIN) {
-                        recoderShortTime();
-                        return true;
-                    }
-                    startEncoding();
-                    break;
-
-            }
-
-            return true;
-
-
-        }
-
-    };
-
-
-    /**
-     * 点击屏幕录制
-     */
-    private View.OnTouchListener onSurfaveViewTouchListener = new View.OnTouchListener() {
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (mMediaRecorder == null || !mCreated) {
-                return false;
-            }
-
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    // 检测是否手动对焦
-                    if (checkCameraFocus(event))
-                        return true;
-                    break;
-            }
-            return true;
-        }
-
-    };
-
 
     @Override
     public void onVideoError(int what, int extra) {
@@ -578,11 +613,6 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
         } else {
             hideProgress();
         }
-        String outputVideoPath = mMediaObject.getOutputVideoPath();
-        //编码完成后，直接调用播放器，不用跳转回原始页面。
-        Intent data = new Intent(this, PlayActivity.class);
-        data.putExtra("path", outputVideoPath);
-        startActivity(data);
     }
 
     @Override
@@ -634,5 +664,6 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
     public static void launchActivity(Context context, int requestCode) {
         launchActivity(context, null, requestCode);
     }
+
 
 }

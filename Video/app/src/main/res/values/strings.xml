@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Video</string>
+    <string name="app_name">录像小程序</string>
 
     <!--VCamera-->
     <string name="hint">提示</string>

@@ -1,5 +1,6 @@
 package com.xiangxun.video.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.GridView;
 
 import com.xiangxun.video.R;
 import com.xiangxun.video.adapter.ShowRecoderAdapter;
-import com.xiangxun.video.base.BaseActivity;
 import com.xiangxun.video.common.CommonCons;
 
 import java.io.File;
@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @TODO: 以GridView展示列表效果。
  */
-public class ShowRecoderActivity extends BaseActivity implements OnItemClickListener {
+public class ShowRecoderActivity extends Activity implements OnItemClickListener {
 
     private GridView gv;
 

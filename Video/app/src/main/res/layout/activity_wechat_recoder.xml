@@ -46,6 +46,7 @@
         android:layout_below="@id/layout_header"
         android:background="@color/black">
 
+
         <SurfaceView
             android:id="@+id/surfaceView"
             android:layout_width="fill_parent"
@@ -58,14 +59,37 @@
             android:scaleType="fitXY"
             android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/id_recoder_ratio"
+            android:layout_width="48dip"
+            android:layout_height="48dip"
+            android:padding="10dp"
+            android:src="@mipmap/ic_recoder_ratio" />
+
+        <ImageView
+            android:id="@+id/id_recoder_switch"
+            android:layout_width="48dip"
+            android:layout_height="48dip"
+            android:layout_centerHorizontal="true"
+            android:padding="10dp"
+            android:src="@mipmap/ic_recoder_switch" />
+
+        <ImageView
+            android:id="@+id/id_recoder_time"
+            android:layout_width="48dip"
+            android:layout_height="48dip"
+            android:layout_alignParentRight="true"
+            android:padding="10dp"
+            android:src="@mipmap/ic_recoder_time" />
+
     </RelativeLayout>
 
 
     <LinearLayout
         android:id="@+id/rl_recorder_bottom"
         android:layout_width="fill_parent"
-        android:layout_alignParentBottom="true"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:background="@color/transparent"
         android:gravity="center"
         android:orientation="vertical"

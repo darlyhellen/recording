@@ -42,7 +42,7 @@ public class ShowRecoderAdapter extends ParentAdapter<File> {
             hocker = (ViewHocker) view.getTag();
         }
         hocker.iv.setImageBitmap(getVideoThumb(file.getPath()));
-        hocker.tv.setText(file.getName());
+        hocker.tv.setText(file.getName() + "--" + (file.length() / 1024)+"KB");
         return view;
     }
 

@@ -1,9 +1,7 @@
 package com.xiangxun.video.base;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.view.Window;
 
 import com.google.gson.Gson;
@@ -18,6 +16,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 public class BaseActivity extends Activity {
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        super.onCreate(savedInstanceState);
+    }
 
     protected ShowLoading loading;
 

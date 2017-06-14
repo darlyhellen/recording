@@ -11,7 +11,7 @@ import com.xiangxun.video.R;
 
 /**
  * @Author maimingliang@gmail.com
- * <p/>
+ * <p>
  * Created by maimingliang on 2016/9/25.
  */
 public class PlayActivity extends Activity {
@@ -69,30 +69,7 @@ public class PlayActivity extends Activity {
 //        videoView.requestFocus();
         // 开始播放
         videoView.start();
-        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-//                mp.start();
-//                mp.setLooping(true);
-            }
-        });
 
-        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-//                videoView.setVideoPath(path);
-//                videoView.start();
-            }
-        });
-
-        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-
-
-                return false;
-            }
-        });
     }
 
 

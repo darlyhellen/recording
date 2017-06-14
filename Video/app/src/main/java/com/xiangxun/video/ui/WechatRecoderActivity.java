@@ -147,7 +147,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         mCreated = false;
         super.onCreate(savedInstanceState);
@@ -231,7 +231,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
         mTvSelectVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                startActivity(new Intent(WechatRecoderActivity.this, ShowRecoderActivity.class));
             }
         });
     }
@@ -637,7 +637,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
 
     @Override
     public void onBackPressed() {
-        MediaRecorderBase.RecursionDeleteFile(new File(CommonCons.ROOT+"recoder"));
+        MediaRecorderBase.RecursionDeleteFile(new File(CommonCons.ROOT + "recoder"));
         if (mMediaObject != null)
             mMediaObject.delete();
         finish();

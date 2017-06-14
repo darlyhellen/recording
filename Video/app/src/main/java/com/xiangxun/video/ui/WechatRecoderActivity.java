@@ -46,7 +46,7 @@ import java.util.ArrayList;
 
 /**
  * @Author maimingliang@gmail.com
- * <p/>
+ * <p>
  * Created by maimingliang on 2016/9/25.
  */
 public class WechatRecoderActivity extends BaseActivity implements MediaRecorderBase.OnErrorListener, MediaRecorderBase.OnEncodeListener, ProgressImage.OnFinishListener {
@@ -215,6 +215,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
                 //选中视频，进行播放或者传递。
                 String outputVideoPath = mMediaObject.getOutputVideoPath();
                 //编码完成后，直接调用播放器，不用跳转回原始页面。
+                Log.i(getClass().getSimpleName(), outputVideoPath);
                 Intent data = new Intent(WechatRecoderActivity.this, PlayActivity.class);
                 data.putExtra("path", outputVideoPath);
                 startActivity(data);
@@ -225,6 +226,12 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
             public void onClick(View v) {
                 select.setVisibility(View.GONE);
                 mBtnPress.setVisibility(View.VISIBLE);
+            }
+        });
+        mTvSelectVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }
@@ -264,9 +271,6 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
         if (!FileUtils.checkFile(f)) {
             f.mkdirs();
         }
-        String key = String.valueOf(System.currentTimeMillis());
-        mMediaObject = mMediaRecorder.setOutputDirectory(key,
-                VCamera.getVideoCachePath() + key);
         mMediaRecorder.setSurfaceHolder(mSurfaceView.getHolder());
         mMediaRecorder.prepare();
     }
@@ -326,6 +330,9 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
 
 
     private void startRecoder() {
+        String key = String.valueOf(System.currentTimeMillis());
+        mMediaObject = mMediaRecorder.setOutputDirectory(key,
+                VCamera.getVideoCachePath() + key);
         if (!APP.isAvailableSpace()) {
             return;
         }
@@ -365,8 +372,9 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
 //    }
 
     private void recoderShortTime() {
-        removeRecoderPart();
-        mHandler.postDelayed(mRunable, 1000l);
+        // removeRecoderPart();
+        select.setVisibility(View.GONE);
+        mBtnPress.setVisibility(View.VISIBLE);
     }
 
     private void hideRecoderTxt() {
@@ -399,7 +407,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
         }
     };
 
-
+    long startTime = 0;
     /**
      * 点击屏幕录制
      */
@@ -417,6 +425,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
                 default:
                     return true;
                 case MotionEvent.ACTION_DOWN:
+                    startTime = System.currentTimeMillis();
                     startY = event.getY();
                     mBtnPress.start();
                     startRecoder();
@@ -444,14 +453,13 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
                 case MotionEvent.ACTION_UP:
                     stopAll();
                     mBtnPress.stop();
-                    int duration = mMediaObject.getDuration();
-                    if (duration < RECORD_TIME_MIN) {
+                    long duration = System.currentTimeMillis();
+                    if (duration - startTime < RECORD_TIME_MIN) {
                         recoderShortTime();
                         return true;
                     }
                     //if (isCancelRecoder) {
                     hideRecoderTxt();
-                    //removeRecoderPart();
                     // }
                     startEncoding();
                     break;
@@ -573,11 +581,7 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
 
     @Override
     public void progressDown() {
-        stopAll();
-        mBtnPress.stop();
         hideRecoderTxt();
-        //removeRecoderPart();
-        startEncoding();
     }
 
     @Override
@@ -622,13 +626,18 @@ public class WechatRecoderActivity extends BaseActivity implements MediaRecorder
         } else {
             hideProgress();
         }
-        Toast.makeText(this, "视频转码失败",
+        Toast.makeText(this, "视频损坏,请重新拍摄",
                 Toast.LENGTH_SHORT).show();
+        removeRecoderPart();
+        initMediaRecorder();
+        select.setVisibility(View.GONE);
+        mBtnPress.setVisibility(View.VISIBLE);
     }
 
 
     @Override
     public void onBackPressed() {
+        MediaRecorderBase.RecursionDeleteFile(new File(CommonCons.ROOT+"recoder"));
         if (mMediaObject != null)
             mMediaObject.delete();
         finish();

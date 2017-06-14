@@ -114,6 +114,14 @@ public class MediaObject implements Serializable {
 		return mOutputVideoPath;
 	}
 
+	public void setOutputVideoPath(String mOutputVideoPath) {
+		this.mOutputVideoPath = mOutputVideoPath;
+	}
+
+	public String getName() {
+		return mKey;
+	}
+
 	/** 获取视频截图最终输出地址 */
 	public String getOutputVideoThumbPath() {
 		return mOutputVideoThumbPath;

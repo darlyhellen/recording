@@ -2,38 +2,44 @@ package com.xiangxun.video.ui;
 
 import android.app.Activity;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
 import com.xiangxun.video.R;
 
+
 /**
  * @Author maimingliang@gmail.com
- * <p>
+ * <p/>
  * Created by maimingliang on 2016/9/25.
  */
-public class PlayActivity extends Activity {
+public class PlayActivity extends Activity implements OnPreparedListener, OnErrorListener {
 
 
     private VideoView videoView;
-    private String videoPath;
-    private MediaController mediaController;
+
+    private MediaController mediaco;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
-
-
         videoView = (VideoView) findViewById(R.id.videoview);
+        mediaco = new MediaController(this);
+        String videoPath = getIntent().getStringExtra("path");
+        videoView.setVideoPath(videoPath);
+        videoView.setMediaController(mediaco);
+        videoView.setOnPreparedListener(this);
+        videoView.setOnErrorListener(this);
 
-        videoPath = getIntent().getStringExtra("path");
+        mediaco.setMediaPlayer(videoView);
+        //让VideiView获取焦点
+        videoView.requestFocus();
 
-        play(videoPath);
-//        mVideoView.setVideoPath(videoPath);
     }
 
 
@@ -54,23 +60,13 @@ public class PlayActivity extends Activity {
         super.onDestroy();
     }
 
-
-    private void play(final String path) {
-
-
-        mediaController = new MediaController(this);
-        videoView.setVideoPath(path);
-        // 设置VideView与MediaController建立关联
-        videoView.setMediaController(mediaController);
-//        // 设置MediaController与VideView建立关联
-        mediaController.setMediaPlayer(videoView);
-        mediaController.setVisibility(View.INVISIBLE);
-        // 让VideoView获取焦点
-//        videoView.requestFocus();
-        // 开始播放
-        videoView.start();
-
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        return true;
     }
 
-
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        videoView.start();
+    }
 }

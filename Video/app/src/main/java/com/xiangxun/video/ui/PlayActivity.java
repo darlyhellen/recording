@@ -2,6 +2,7 @@ package com.xiangxun.video.ui;
 
 import android.app.Activity;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
@@ -16,12 +17,14 @@ import com.xiangxun.video.R;
  * <p/>
  * Created by maimingliang on 2016/9/25.
  */
-public class PlayActivity extends Activity implements OnPreparedListener, OnErrorListener {
+public class PlayActivity extends Activity implements OnPreparedListener, OnErrorListener, OnCompletionListener {
 
 
     private VideoView videoView;
 
     private MediaController mediaco;
+
+    private String videoPath;
 
 
     @Override
@@ -30,7 +33,7 @@ public class PlayActivity extends Activity implements OnPreparedListener, OnErro
         setContentView(R.layout.activity_play);
         videoView = (VideoView) findViewById(R.id.videoview);
         mediaco = new MediaController(this);
-        String videoPath = getIntent().getStringExtra("path");
+        videoPath = getIntent().getStringExtra("path");
         videoView.setVideoPath(videoPath);
         videoView.setMediaController(mediaco);
         videoView.setOnPreparedListener(this);
@@ -39,7 +42,7 @@ public class PlayActivity extends Activity implements OnPreparedListener, OnErro
         mediaco.setMediaPlayer(videoView);
         //让VideiView获取焦点
         videoView.requestFocus();
-
+        videoView.start();
     }
 
 
@@ -67,6 +70,14 @@ public class PlayActivity extends Activity implements OnPreparedListener, OnErro
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        mp.start();
+        mp.setLooping(true);
+    }
+
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        videoView.setVideoPath(videoPath);
         videoView.start();
     }
 }

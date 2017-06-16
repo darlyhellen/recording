@@ -19,7 +19,7 @@ public class MediaRecorderNative extends MediaRecorderBase implements MediaRecor
     /**
      * 视频后缀
      */
-    private static final String VIDEO_SUFFIX = ".ts";
+    private static final String VIDEO_SUFFIX = ".mp4";
 
     /**
      * 开始录制

@@ -7,6 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.hardware.Camera;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,10 +24,12 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.xiangxun.video.R;
 import com.xiangxun.video.base.APP;
@@ -51,10 +57,10 @@ import java.util.List;
 
 /**
  * @Author maimingliang@gmail.com
- * <p>
+ * <p/>
  * Created by maimingliang on 2016/9/25.
  */
-public class WechatRecoderActivity extends Activity implements MediaRecorderBase.OnErrorListener, MediaRecorderBase.OnEncodeListener, ProgressImage.OnFinishListener {
+public class WechatRecoderActivity extends Activity implements MediaRecorderBase.OnErrorListener, MediaRecorderBase.OnEncodeListener, ProgressImage.OnFinishListener, OnPreparedListener, OnErrorListener, OnCompletionListener {
 
 
     /**
@@ -141,6 +147,9 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
     TextView mTvSelectVideo;
     RelativeLayout mLayoutHeader;
     SurfaceView mSurfaceView;
+    MediaController mediaco;
+    VideoView videoView;
+
     ImageView mImgRecordFocusing;
     RelativeLayout mRlRecoderSurfaceview;
     LinearLayout mRlRecorderBottom;
@@ -209,6 +218,7 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
         mTvSelectVideo = (TextView) findViewById(R.id.tv_select_video);
         mLayoutHeader = (RelativeLayout) findViewById(R.id.layout_header);
         mSurfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+        videoView = (VideoView) findViewById(R.id.videoview);
         mImgRecordFocusing = (ImageView) findViewById(R.id.img_record_focusing);
         mRlRecoderSurfaceview = (RelativeLayout) findViewById(R.id.rl_recoder_surfaceview);
         mBtnPress = (ProgressImage) findViewById(R.id.btn_press);
@@ -225,6 +235,15 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
         id_recoder_ratio = (ImageView) findViewById(R.id.id_recoder_ratio);
         id_recoder_time = (ImageView) findViewById(R.id.id_recoder_time);
         id_recoder_switch = (ImageView) findViewById(R.id.id_recoder_switch);
+
+
+        mediaco = new MediaController(this);
+        mediaco.setVisibility(View.INVISIBLE);
+        videoView.setMediaController(mediaco);
+        videoView.setOnPreparedListener(this);
+        videoView.setOnErrorListener(this);
+        videoView.setOnCompletionListener(this);
+        mediaco.setMediaPlayer(videoView);
     }
 
 
@@ -339,8 +358,7 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
         id_recorder_de.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                select.setVisibility(View.GONE);
-                mBtnPress.setVisibility(View.VISIBLE);
+                onResume();
             }
         });
         mTvSelectVideo.setOnClickListener(new View.OnClickListener() {
@@ -354,9 +372,14 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
     @Override
     protected void onResume() {
         super.onResume();
+
+        select.setVisibility(View.GONE);
+        mBtnPress.setVisibility(View.VISIBLE);
+        mSurfaceView.setVisibility(View.VISIBLE);
+        videoView.setVisibility(View.GONE);
+        videoView.stopPlayback();
         UtilityAdapter.freeFilterParser();
         UtilityAdapter.initFilterParser();
-
         if (mMediaRecorder == null) {
             initMediaRecorder();
         } else {
@@ -371,7 +394,6 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
         UtilityAdapter.freeFilterParser();
         if (mMediaRecorder != null)
             mMediaRecorder.release();
-
     }
 
     /**
@@ -756,6 +778,16 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
         } else {
             hideProgress();
         }
+        //转码完成后，进行播放。
+        mSurfaceView.setVisibility(View.GONE);
+        videoView.setVisibility(View.VISIBLE);
+        videoView.setVideoPath(mMediaObject.getOutputVideoPath());
+        videoView.start();
+
+        stopRecord();
+        UtilityAdapter.freeFilterParser();
+        if (mMediaRecorder != null)
+            mMediaRecorder.release();
     }
 
     @Override
@@ -814,4 +846,21 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
     }
 
 
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        return true;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mp.start();
+        mp.setLooping(true);
+    }
+
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        videoView.setVideoPath(mMediaObject.getOutputVideoPath());
+        videoView.start();
+    }
 }

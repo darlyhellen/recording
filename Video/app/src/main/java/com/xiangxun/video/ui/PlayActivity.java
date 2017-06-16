@@ -38,6 +38,7 @@ public class PlayActivity extends Activity implements OnPreparedListener, OnErro
         videoView.setMediaController(mediaco);
         videoView.setOnPreparedListener(this);
         videoView.setOnErrorListener(this);
+        videoView.setOnCompletionListener(this);
 
         mediaco.setMediaPlayer(videoView);
         //让VideiView获取焦点

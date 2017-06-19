@@ -806,17 +806,15 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
             @Override
             protected Boolean doInBackground(Void... params) {
                 //合并ts流
-//                String cmd = String.format("ffmpeg %s -i \"%s\" -vcodec copy -acodec copy -absf aac_adtstoasc -f mp4 -movflags faststart \"%s\"", FFMpegUtils.getLogCommand(), mMediaObject.getConcatYUV(), mMediaObject.getOutputTempVideoPath());
-//                Log.i(getClass().getSimpleName(), cmd);
-//                return UtilityAdapter.FFmpegRun("", cmd) == 0;
-                return copyFile(mMediaObject);
+                String cmd = String.format("ffmpeg %s -i \"%s\" -vcodec copy -acodec copy -absf aac_adtstoasc -f mp4 -movflags faststart \"%s\"", FFMpegUtils.getLogCommand(), mMediaObject.getConcatYUV(), mMediaObject.getOutputTempVideoPath());
+                return UtilityAdapter.FFmpegRun("", cmd) == 0;
             }
 
             @Override
             protected void onPostExecute(Boolean result) {
                 if (result) {
                     //清理ts文件。
-                    //copyFile(mMediaObject);
+                    copyFile(mMediaObject);
                     mEncodeHanlder.sendEmptyMessage(MESSAGE_ENCODE_COMPLETE);
                 } else {
                     mEncodeHanlder.sendEmptyMessage(MESSAGE_ENCODE_ERROR);
@@ -832,10 +830,9 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
         try {
             int bytesum = 0;
             int byteread = 0;
-            // File oldfile = new File(mMediaObject.getOutputVideoPath());
-            File oldfile = new File(mMediaObject.getConcatYUV());
+            File oldfile = new File(mMediaObject.getOutputVideoPath());
             if (oldfile.exists()) { //文件存在时
-                InputStream inStream = new FileInputStream(mMediaObject.getConcatYUV()); //读入原文件
+                InputStream inStream = new FileInputStream(mMediaObject.getOutputVideoPath()); //读入原文件
                 FileOutputStream fs = new FileOutputStream(CommonCons.ROOT + mMediaObject.getName() + ".mp4");
                 byte[] buffer = new byte[8444];
                 int length;

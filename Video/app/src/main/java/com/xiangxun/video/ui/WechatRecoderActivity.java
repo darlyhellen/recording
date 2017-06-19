@@ -475,7 +475,6 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
         }
         select.setVisibility(View.GONE);
         mBtnPress.setVisibility(View.VISIBLE);
-        //isCancelRecoder = false;
         if (mMediaRecorder == null) {
             return;
         }
@@ -483,8 +482,6 @@ public class WechatRecoderActivity extends Activity implements MediaRecorderBase
         if (part == null) {
             return;
         }
-        // isRecoder = true;
-
     }
 
 

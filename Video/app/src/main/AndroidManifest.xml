@@ -32,7 +32,7 @@
         android:supportsRtl="true">
 
         <activity
-            android:name=".ui.WechatRecoderActivity"
+            android:name=".ui.TestActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"

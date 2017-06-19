@@ -1,8 +1,13 @@
 package com.xiangxun.video.common;
 
+import android.content.Context;
+
+import com.xiangxun.video.R;
+import com.xiangxun.video.camera.util.FileUtils;
+
 /**
  * Created by maimingliang on 2016/9/25.
- *设置录制参数
+ * 设置录制参数
  */
 
 public class RecoderAttrs {
@@ -25,7 +30,7 @@ public class RecoderAttrs {
     private int offsetDrution;
 
     /**
-     *titel_bar 取消颜色
+     * titel_bar 取消颜色
      * 值为 十六进制 如：0xFFFC2828
      */
     private int titelBarCancelTextColor;
@@ -42,18 +47,18 @@ public class RecoderAttrs {
      * progress 小于录制最少时间的颜色
      * 值为 十六进制 如：0xFFFC2828
      */
-    private  int lowMinTimeProgressColor;
+    private int lowMinTimeProgressColor;
     /**
      * progress 颜色
      * 值为 十六进制 如：0xFFFC2828
      */
-    private  int progressColor ;
+    private int progressColor;
 
 
     private int pressBtnBg;
 
 
-    private RecoderAttrs(int recoderTimeMax, int recoderTimeMin, int offsetDrution, int titelBarCancelTextColor, int pressBtnColor, int lowMinTimeProgressColor, int progressColor,int pressBtnBg) {
+    private RecoderAttrs(int recoderTimeMax, int recoderTimeMin, int offsetDrution, int titelBarCancelTextColor, int pressBtnColor, int lowMinTimeProgressColor, int progressColor, int pressBtnBg) {
         this.recoderTimeMax = recoderTimeMax;
         this.recoderTimeMin = recoderTimeMin;
         this.offsetDrution = offsetDrution;
@@ -97,59 +102,59 @@ public class RecoderAttrs {
         return pressBtnBg;
     }
 
-    public static class Builder{
+    public static class Builder {
 
         private int recoderTimeMax;
         private int recoderTimeMin;
         private int offsetDrution;
         private int titleBarCancelTextColor;
         private int pressBtnColor;
-        private  int lowMinTimeProgressColor;
-        private  int progressColor ;
+        private int lowMinTimeProgressColor;
+        private int progressColor;
         private int pressBtnBg;
 
-        public Builder recoderTimeMax(int recoderTimeMax){
+        public Builder recoderTimeMax(int recoderTimeMax) {
             this.recoderTimeMax = recoderTimeMax;
             return this;
         }
 
-        public Builder recoderTimeMin(int recoderTimeMin){
+        public Builder recoderTimeMin(int recoderTimeMin) {
             this.recoderTimeMin = recoderTimeMin;
             return this;
         }
 
-        public Builder offsetDrution(int offsetDrution){
+        public Builder offsetDrution(int offsetDrution) {
             this.offsetDrution = offsetDrution;
             return this;
         }
 
-        public Builder titleBarCancelTextColor(int titleBarCancelTextColor){
+        public Builder titleBarCancelTextColor(int titleBarCancelTextColor) {
             this.titleBarCancelTextColor = titleBarCancelTextColor;
             return this;
         }
 
-        public Builder pressBtnTextColor(int pressBtnColor){
+        public Builder pressBtnTextColor(int pressBtnColor) {
             this.pressBtnColor = pressBtnColor;
             return this;
         }
 
-        public Builder lowMinTimeProgressColor(int lowMinTimeProgressColor){
+        public Builder lowMinTimeProgressColor(int lowMinTimeProgressColor) {
             this.lowMinTimeProgressColor = lowMinTimeProgressColor;
             return this;
         }
 
-        public Builder progressColor(int progressColor){
+        public Builder progressColor(int progressColor) {
             this.progressColor = progressColor;
             return this;
         }
 
 
-        public Builder pressBtnColorBg(int pressBtnBg){
+        public Builder pressBtnColorBg(int pressBtnBg) {
             this.pressBtnBg = pressBtnBg;
             return this;
         }
 
-        public RecoderAttrs build(){
+        public RecoderAttrs build() {
             return new RecoderAttrs(
                     recoderTimeMax,
                     recoderTimeMin,
@@ -163,5 +168,22 @@ public class RecoderAttrs {
 
     }
 
+    public final static int AVAILABLE_SPACE = 500;//M
 
+    /**
+     * 检测用户手机是否剩余可用空间200M以上
+     *
+     * @return
+     */
+    public static boolean isAvailableSpace(Context context) {
+        if (context == null) {
+            return false;
+        }
+        //检测磁盘空间
+        if (FileUtils.showFileAvailable() < AVAILABLE_SPACE) {
+            ToastApp.showToast(context, context.getString(R.string.record_check_available_faild, AVAILABLE_SPACE));
+            return false;
+        }
+        return true;
+    }
 }

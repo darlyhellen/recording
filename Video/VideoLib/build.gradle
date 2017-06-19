@@ -1,14 +1,12 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "workorder.video"
         minSdkVersion 15
         targetSdkVersion 25
-        maxSdkVersion 25
         versionCode 1
         versionName "1.0"
     }
@@ -22,5 +20,4 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':VideoLib')
 }
